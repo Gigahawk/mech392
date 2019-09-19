@@ -1,0 +1,115 @@
+#+TITLE: MECH 392 Assignment 1 - Machining
+#+AUTHOR: Jasper Chan - 37467164
+#+OPTIONS: toc:nil
+
+#+LATEX_HEADER: \usepackage{siunitx}
+#+LATEX_HEADER: \sisetup{inter-unit-product=\cdot}
+#+LATEX_HEADER: \DeclareSIUnit\rev{rev}
+
+#+LATEX_HEADER: \setlength{\parindent}{0pt}
+#+LATEX_HEADER: \setlength{\parskip}{12pt}
+* 
+In a turning operation on low Carbon Steel,
+the cutting speed is \SI{165}{\milli\meter/\second},
+Feed Speed is \SI{0.25}{\milli\meter/\rev},
+depth of cut \SI{5}{\milli\meter}.
+How much power will the lathe draw performing this operation?
+The mechanical efficiency of the lathe is \SI{85}{\percent}.
+The Specific cutting energy of the workpiece material is \SI{1.6}{\watt\cdot\second/\milli\meter^3}
+
+The cutting power of the blade can be calculated by:
+\begin{align*}
+\underbrace{\text{MRR}}_{\substack{\text{Material}\\ \text{Removal}\\ \text{Rate}}} &=
+v_{\text{cut}} \cdot v_{\text{feed}} \cdot d \\
+&= (\SI{165}{\milli\meter/\second}) \cdot (\SI{0.25}{\milli\meter/\rev}) \cdot (\SI{5}{\milli\meter}) \\
+&= \SI{206.25}{\milli\meter^3/\second \cdot \rev} \\
+\\
+P_{\text{cut}} &= c_{\text{cutting}} \cdot \text{MRR} \\
+&= (\SI{1.6}{\watt\cdot\second/\milli\meter^3}) \cdot (\SI{206.25}{\milli\meter^3/\second \cdot \rev}) \\
+&= \SI{330}{\watt}
+\end{align*}
+
+We can then calculate the power drawn by the lathe to provide this power
+\begin{align*}
+P_{\text{lathe}} &= \frac{P_{\text{cut}}}{\eta} \\
+&= \frac{\SI{5.5}{\watt}}{\SI{0.85}{\percent}} \\
+&= \SI{388.23}{\watt}
+\end{align*}
+
+* 
+In a turning operation, the cutting tool has a rake angle \SI{10}{\degree}.
+The chip thickness before the cut $t_0 = \SI{0.5}{\milli\meter}$
+and after the cut $t_c = \SI{1.25}{\milli\meter}$.
+The workpiece is an Aluminium allow shaft with the specific cutting energy \SI{0.7}{\newton \cdot \meter /\milli\meter^3}.
+The cutting speed is \SI{120}{\meter/\minute}
+** 
+Determine the friction coefficient between the tool and workpiece
+
+First we find the chip thickness ratio:
+\begin{align*}
+r &= \frac{t_0}{t_c} \\
+&= \frac{(\SI{0.5}{\milli\meter})}{(\SI{1.25}{\milli\meter})} \\
+&= 0.4
+\end{align*}
+
+Next we can find the shear angle by:
+\begin{align*}
+\phi &= \arctan{\left(\frac{r\cos{\alpha}}{1 - r\sin{\alpha}}\right)} \\
+&= \arctan{\left(\frac{(0.4)\cos{(\SI{10}{\degree})}}{1 - (0.4)\sin{(\SI{10}{\degree})}}\right)} \\
+&= \SI{22.944}{\degree}
+\end{align*}
+
+Next we can solve for $\beta$:
+\begin{align*}
+\phi &= \SI{45}{\degree} + \frac{\alpha}{2} - \frac{\beta}{2} \\
+\beta &= -2\left(\phi - \SI{45}{\degree} - \frac{\alpha}{2}\right)\\
+&= -2\left((\SI{22.944}{\degree}) - \SI{45}{\degree} - \frac{(\SI{10}{\degree})}{2}\right) \\
+&= \SI{54.112}{\degree}
+\end{align*}
+
+With this, we can find the friction coefficient:
+\begin{align*}
+\mu &= \tan{\beta} \\
+&= \tan{(\SI{54.112}{\degree})} \\
+&= 1.38
+\end{align*}
+** 
+Estimate the power requirement for machining the workpiece if the average cutting force is measured \SI{1550}{\newton} during machining.
+
+We can calculate the cutting power by:
+\begin{align*}
+P &= F_c \cdot v_\text{cut} \\
+&= (\SI{1550}{\newton}) \cdot (\SI{120}{\meter/\minute}) \\
+&= \SI{3100}{\watt}
+\end{align*}
+
+* 
+A CNC lathe is programmed to taper a cylindrical shaft.
+The machining starts at a maximum depth of cut (end A) and taper down to 0 depth of cut at B.
+If the axial speed of the tool is $V_a$ and the rotation speed of the shaft is $N$, find a formula to compute the power change during machining this shaft?
+
+The depth of cut $h(x)$ is defined as:
+\begin{equation*}
+h(x) = \frac{L - x}{L}\frac{D - d}{2}
+\end{equation*}
+
+The MRR is defined as:
+\begin{equation*}
+\text{MRR} = \pi D N V_a h(x)
+\end{equation*}
+
+Assuming the SCE is constant, we can define $P(x)$ as:
+\begin{equation*}
+P(x) = \text{SCE} \pi D N V_a h(x)
+\end{equation*}
+
+At the end of the cut $x = L$, $P(L) = 0$.
+At the begining of the cut $x = 0$:
+\begin{align*}
+P(0) &= (\text{SCE}) \pi D N  V_a  \frac{D - d}{2} \\
+\Delta P &= P(0)
+\end{align*}
+
+
+
+
