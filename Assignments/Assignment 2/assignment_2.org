@@ -1,0 +1,214 @@
+#+TITLE: MECH 392 Assignment 2
+#+AUTHOR: Jasper Chan - 37467164
+#+OPTIONS: toc:nil
+
+#+LATEX_HEADER: \usepackage{siunitx}
+#+LATEX_HEADER: \sisetup{inter-unit-product=\cdot}
+#+LATEX_HEADER: \sisetup{per-mode=symbol}
+#+LATEX_HEADER: \DeclareSIUnit\rev{rev}
+#+LATEX_HEADER: \DeclareSIUnit\rpm{RPM}
+
+#+LATEX_HEADER: \setlength{\parindent}{0pt}
+#+LATEX_HEADER: \setlength{\parskip}{12pt}
+#+BEGIN_SRC ipython :session :exports none
+import pint
+import numpy as np
+ureg = pint.UnitRegistry()
+ureg.default_format = '.3f'
+Q_ = ureg.Quantity
+#+END_SRC
+
+#+RESULTS:
+: # Out[135]:
+
+* 
+The following figure shows the stability lobe of a milling machine.
+The operator is running the machine at \SI{24000}{\rpm}, with depth of cut \SI{3.5}{\milli\meter}.
+At this setup the tool chatters excessively.
+According to the stability lobe diagram decreasing the depth of cut is \textcolor{red}{not} a good option (since he must decrease the cut to \SI{2.1}{\milli\meter} to avoid chatter, see the stability lobe below).
+Increasing the rpm is not also an option (since, based on the chart, the machine must be run at \SI{26000}{\rpm} to pass the unstable zone when the depth of cut is \SI{3.5}{\milli\meter}.
+Unfortunately, the machine does not have enough power to go over \SI{25000}{\rpm} when cutting this workpiece (mid carbon steel)).
+Please provide some possible solutions to avoid chatter in this operation, if changing the depth of cut and rpm are not and option, and state why they will solve the chatter? (brief and to the point)
+#+BEGIN_center
+#+ATTR_LATEX: :width 0.6\textwidth :center
+[[file:q1_1.jpg]]
+#+ATTR_LATEX: :width 0.3\textwidth :center
+[[file:q1_2.jpg]]
+#+END_center
+
+- Using a tool with a different (larger) diameter will increase the stiffness and reduce chatter.
+- Shortening the length of the bit will reduce the moment arm and reduce chatter.
+- Reducing the number of flutes reduces cutting forces.
+- Using a tool with a stiffer material will lower deflection.
+
+* 
+A side milling operation is set to cut \SI{2.0}{\milli\meter} from one side of an aluminum block.
+An end milling bit with 3 flutes, and nominal diameter of \SI{10}{\milli\meter} is used.
+If the total lateral force during the cutting is measured \SI{125}{\newton}.
+What tolerance can we get for the final dimension in this operation?
+The tool material is AHSS (advanced high-strength, also called ultra-high-strength steels) with a Tensile Strength of \SI{670}{\mega\pascal}, and Modulus of Elasticity \SI{270}{\giga\pascal}.
+/(hint: model the tool as a cantilever beam and distribute the load along the high \SI{15}{\milli\meter} of the tool, as shown, then approximate the tool deflection due to this load)/.
+
+#+ATTR_LATEX: :width 0.8\textwidth
+[[file:q2.jpg]]
+
+#+BEGIN_SRC ipython :session :results output :exports both
+
+W = 125 * ureg.N # cutting force
+d = 15 * ureg.mm # load distribution height
+w = W/d # distributed load
+
+a = 70 * ureg.mm # Distance from fixed mount to start of load
+b = 85 * ureg.mm # Distance from fixed mount to end of load
+L = 85 * ureg.mm # Length of beam
+
+D = 10 * ureg.mm
+I = np.pi*(D/2)**4 / 4 # Area Moment of Inertia
+E = 272 * ureg.GPa # Modulus of Elasticity
+
+def deflection(w, E, I, L, a, b):
+    return -w/(24*E*I)*(4*L*(b**3 - a**3) - (b**4 - a**4))
+
+y = deflection(w, E, I, L, a, b)
+print(y.to(ureg.mm))
+
+#+END_SRC
+
+#+RESULTS:
+: -0.166 millimeter
+
+* 
+Following figure shows a schematic of a mold which is designed for forming of an Aluminum sheet metal with thickness of \SI{2.5}{\milli\meter}.
+Assume the sheet is not stretched before forming.
+First find out if the mold meets the requirement for the minimum radius.
+Then, find the final radius of the sheet after exiting the mold? \\
+$\rho = \SI{2700}{\kilo\gram\per\meter^3}$, 
+$E = \SI{69}{\giga\pascal}$, 
+$\sigma_y = \SI{400}{\mega\pascal}$,
+$\sigma_u = \SI{655}{\mega\pascal}$, \\
+$\text{R1} = \SI{15}{\centi\meter}$, 
+$\text{R2} = \SI{17}{\centi\meter}$, 
+$\text{R2} = \SI{19}{\centi\meter}$ 
+
+\textcolor{red}{Note:} Correct Spring Back formula:
+$$\Delta K =
+    1.5K_y
+    \left(
+        1 - \frac{1}{3}
+        \left(
+            \frac{K_y}{K_L}
+        \right)^2
+    \right)
+$$
+$$K_\text{final} = K_L - \Delta K$$
+\begin{align*}
+\text{Yield curvature} &:=
+    K_y =
+        \frac{\sigma_y}{
+            E\frac{h}{2}
+        } \\
+\text{Mold curvature (1/R)} &:= K_L
+\end{align*}
+
+\textcolor{red}{Note:} If you get large numbers for the final radius of curature, that is correct
+(it shows if the sheet is not stretched before forming, we will not get the shape we want, because of the spring back!)
+
+#+BEGIN_center
+#+ATTR_LATEX: :width 0.45\textwidth :center
+[[file:q3_1.jpg]]
+#+ATTR_LATEX: :width 0.45\textwidth :center
+[[file:q3_2.jpg]]
+#+END_center
+
+First, let's calculate the minimum radius:
+#+BEGIN_SRC ipython :session :results output :exports both
+
+rho = 2700 * ureg.kg/ureg.m**3 # Density
+E = 69 * ureg.GPa # Modulus of Elasticity
+sigma_y = 400 * ureg.MPa # Yield Strength
+sigma_u = 655 * ureg.MPa # Ultimate Strength
+
+h = 2.5 * ureg.mm # Sheet thickness
+
+R = [15, 17, 19] * ureg.cm
+
+K_y = sigma_y/(E*(h/2))
+R_min = 1/K_y
+
+print(f"The minimum radius is {R_min.to(ureg.cm):.1f}")
+#+END_SRC
+
+#+RESULTS:
+: The minimum radius is 21.6 centimeter
+
+The bend radii is smaller than $R_\text{min}$, hence the sheet will yield.
+We can however, still calculate the final radii after exiting the mold.
+
+#+BEGIN_SRC ipython :session :results output :exports both
+K_L = 1/R
+dK = 1.5 * K_y*(1 - 1/3 * (K_y/K_L)**2)
+K_f = K_L - dK
+R_f = 1/K_f
+
+for idx, r in enumerate(R_f):
+    print(f"R{idx + 1}_final = {r:.1f}")
+
+#+END_SRC
+
+#+RESULTS:
+: R1_final = 120.1 centimeter
+: R2_final = 272.3 centimeter
+: R3_final = 933.9 centimeter
+
+* 
+The LEGO brick is the most recognized injection molded part in the world.
+#+ATTR_LATEX: :width 0.3\textwidth
+[[file:q4.jpg]]
+** 
+Estimate the cooling time of a LEGO brick (\SI{1.2}{\milli\meter} thickness).
+Assume ABS is injected at \SI{220}{\celsius},
+the mold temperature is \SI{45}{\celsius},
+the thermal conductivity $k$ of ABS is \SI{0.5}{\watt\per\meter\per\kelvin},
+and the part is ejected at \SI{95}{\celsius}.
+Assume ABS has a density $\rho$ of \SI{1000}{\kilo\gram\per\meter^3} and
+a specific heat capacity $C_p$ of \SI{1985}{\joule\per\kilo\gram\per\kelvin}?
+
+#+BEGIN_SRC ipython :session :results output :exports both
+def t_cool(h, T_m, T_w, T_e, alpha):
+    return h**2/(10*alpha) * np.log(4/np.pi * (T_m - T_w)/(T_e - T_w))
+
+k = 0.5 * ureg.W / (ureg.m * ureg.K)
+rho = 1000 * ureg.kg / ureg.m**3
+C_p = 1985 * ureg.J / (ureg.kg * ureg.K)
+
+alpha = k / (rho*C_p)
+
+h = 1.2 * ureg.mm # Part thickness
+
+T_m = Q_(220, ureg.degC) # Molten temperature
+T_w = Q_(45, ureg.degC) # Wall/mould temperature
+T_e = Q_(95, ureg.degC) # Ejection temperature
+
+t_c = t_cool(h, T_m, T_w, T_e, alpha)
+
+
+print(f"t_cool = {t_c.to(ureg.s)}")
+
+#+END_SRC
+
+#+RESULTS:
+: t_cool = 0.854 second
+
+** 
+If the thickness is halved determine how much the cooling time is reduced?
+#+BEGIN_SRC ipython :session :results output :exports both
+
+t_c2 = t_cool(h/2, T_m, T_w, T_e, alpha)
+dt_c = t_c - t_c2
+
+print(f"The cooling time is reduced by {dt_c.to(ureg.s)}")
+
+#+END_SRC
+
+#+RESULTS:
+: The cooling time is reduced by 0.641 second
